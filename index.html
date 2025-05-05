@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frase Impressionante</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.6/babel.min.js"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const QuoteApp = () => {
+      const [quote, setQuote] = useState('');
+      const [bookTitle, setBookTitle] = useState('');
+      const [author, setAuthor] = useState('');
+      const [quotes, setQuotes] = useState([]);
+
+      // 로컬 스토리지에서 구절 로드
+      useEffect(() => {
+        const savedQuotes = localStorage.getItem('quotes');
+        if (savedQuotes) {
+          setQuotes(JSON.parse(savedQuotes));
+        }
+      }, []);
+
+      // 구절 저장 시 로컬 스토리지 업데이트
+      useEffect(() => {
+        localStorage.setItem('quotes', JSON.stringify(quotes));
+      }, [quotes]);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (quote.trim() && bookTitle.trim() && author.trim()) {
+          setQuotes([{ text: quote, bookTitle, author, id: Date.now() }, ...quotes]);
+          setQuote('');
+          setBookTitle('');
+          setAuthor('');
+        } else {
+          alert('모든 필드를 올바르게 입력해주세요.');
+        }
+      };
+
+      const handleDelete = (id) => {
+        setQuotes(quotes.filter((q) => q.id !== id));
+      };
+
+      return (
+        <div className="max-w-2xl mx-auto p-4">
+          <h1 className="text-4xl font-bold text-center mb-6 text-white font-['Playfair_Display'] shadow-sm">Frase Impressionante</h1>
+          
+          {/* 입력 폼 */}
+          <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md mb-6">
+            <textarea
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              rows="4"
+              placeholder="여기에 인상적인 구절을 입력하세요..."
+              value={quote}
+              onChange={(e) => setQuote(e.target.value)}
+            ></textarea>
+            <input
+              type="text"
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              placeholder="책 제목을 입력하세요"
+              value={bookTitle}
+              onChange={(e) => setBookTitle(e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              placeholder="작가를 입력하세요"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+            <button
+              className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition"
+              onClick={handleSubmit}
+            >
+              업로드
+            </button>
+          </div>
+
+          {/* 구절 목록 */}
+          <div className="space-y-4">
+            {quotes.length === 0 ? (
+              <p className="text-center text-gray-100 bg-white bg-opacity-90 p-4 rounded-md">아직 구절이 없습니다.</p>
+            ) : (
+              quotes.map((q) => (
+                <div
+                  key={q.id}
+                  className="bg-white bg-opacity-90 p-4 rounded-lg shadow-md relative"
+                >
+                  <button
+                    className="absolute top-2 right-2 bg-white text-gray-800 text-sm p-1 rounded-full hover:bg-gray-200 transition"
+                    onClick={() => handleDelete(q.id)}
+                  >
+                    X
+                  </button>
+                  <p className="text-2xl text-gray-800 font-semibold font-['Playfair_Display']">"{q.text}"</p>
+                  <p className="text-base text-gray-600 mt-2 font-sans">{q.bookTitle} _ {q.author}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<QuoteApp />);
+  </script>
+</body>
+</html>
